@@ -1,8 +1,6 @@
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:on_audio_query/on_audio_query.dart';
-import 'package:pluseplay/database/models/all_songs/all_song_model.dart';
 import 'package:pluseplay/database/function/favourite/favourite.dart';
 import 'package:pluseplay/database/models/favourites/favourite_model.dart';
 import 'package:pluseplay/screens/playList/playlist.dart';
@@ -11,9 +9,9 @@ import 'package:pluseplay/database/function/recent_play/recent_play.dart';
 
 class PlayingNow extends StatefulWidget {
   final dynamic song;
-  final List<dynamic> allSongs; // List of all songs
-  final List<dynamic> recentPlays; // List of recent plays
-  final bool isFromRecent; // Determine if playing from recent plays
+  final List<dynamic> allSongs; 
+  final List<dynamic> recentPlays; 
+  final bool isFromRecent; 
 
   const PlayingNow({
     Key? key,
@@ -32,6 +30,7 @@ class _PlayingNowState extends State<PlayingNow> {
   late ValueNotifier<bool> isPlayingNotifier;
   late ValueNotifier<Duration> durationNotifier;
   late ValueNotifier<Duration> positionNotifier;
+  late ValueNotifier<bool> isFavoriteNotifier;
   late List<dynamic> currentPlaylist; // Current playlist
   late int currentIndex; // Current song index
 
@@ -41,22 +40,14 @@ class _PlayingNowState extends State<PlayingNow> {
     isPlayingNotifier = ValueNotifier(false);
     durationNotifier = ValueNotifier(Duration.zero);
     positionNotifier = ValueNotifier(Duration.zero);
-    
-    // Initialize current playlist based on where the song is coming from
+    isFavoriteNotifier = ValueNotifier(false);
+
     currentPlaylist = widget.isFromRecent ? widget.recentPlays : widget.allSongs;
     currentIndex = currentPlaylist.indexWhere((song) => song.id == widget.song.id);
-    
-    _initializePlayer();
 
-    // Initialize favorite state
+    _initializePlayer();
     _updateFavoriteState();
-    
-    // Listen to changes in favoriteNotifier
-    favoriteNotifier.addListener(() {
-      if (mounted) {
-        _updateFavoriteState();
-      }
-    });
+    favoriteNotifier.addListener(_updateFavoriteState);
 
     _audioPlayer.positionStream.listen((newPosition) {
       if (mounted) positionNotifier.value = newPosition;
@@ -68,19 +59,19 @@ class _PlayingNowState extends State<PlayingNow> {
       if (mounted) isPlayingNotifier.value = isPlaying;
     });
 
-    // Listen for when the audio player finishes playing a song
     _audioPlayer.playerStateStream.listen((state) {
-      if (state.playing) {
-        // Do nothing
-      } else if (state.processingState == ProcessingState.completed) {
-        _playNext(); // Automatically play the next song when the current one finishes
+      if (state.processingState == ProcessingState.completed) {
+        _playNext(); // Automatically play the next song when the current one is finished
       }
     });
   }
 
   void _updateFavoriteState() {
-    final isFavorite = favoriteNotifier.value.any((fav) => fav.id == widget.song.id);
-    isPlayingNotifier.value = isFavorite; 
+    if (currentIndex < 0 || currentIndex >= currentPlaylist.length) {
+      return;
+    }
+    final isFavorite = favoriteNotifier.value.any((fav) => fav.id == currentPlaylist[currentIndex].id);
+    isFavoriteNotifier.value = isFavorite;
   }
 
   Future<void> _initializePlayer() async {
@@ -97,6 +88,7 @@ class _PlayingNowState extends State<PlayingNow> {
           timestamp: DateTime.now(),
           songPath: widget.song.songPath,
         ));
+        _updateFavoriteState();
       } else {
         throw Exception("Invalid song URI!");
       }
@@ -110,37 +102,57 @@ class _PlayingNowState extends State<PlayingNow> {
   }
 
   Future<void> _toggleFavorite() async {
-    final songId = widget.song.id!;
+    if (currentIndex < 0 || currentIndex >= currentPlaylist.length) {
+      return;
+    }
+
+    final songId = currentPlaylist[currentIndex].id!;
     if (favoriteNotifier.value.any((fav) => fav.id == songId)) {
       await deleteFromFavorites(songId);
     } else {
       final newFavorite = FavoriteModel(
         id: songId,
-        songTitle: widget.song.songTitle,
-        artist: widget.song.artist,
-        uri: widget.song.uri ,
-        imageUri: widget.song.imageBytes!,
-        songPath: widget.song.songPath,
-      );
-      await addSongToFavorites(newFavorite);
-    }
-  }
-
-  Future<void> _playNext() async {
-    if (currentIndex < currentPlaylist.length - 1) {
-      setState(() {
-        currentIndex++;
-      });
-      await _initializePlayer(); // Initialize player with the next song
-      await addRecentPlay(RecentPlayModel( // Add the next song to recent plays
-        id: currentPlaylist[currentIndex].id !,
         songTitle: currentPlaylist[currentIndex].songTitle,
         artist: currentPlaylist[currentIndex].artist,
         uri: currentPlaylist[currentIndex].uri,
         imageUri: currentPlaylist[currentIndex].imageBytes!,
-        timestamp: DateTime.now(),
         songPath: currentPlaylist[currentIndex].songPath,
-      ));
+      );
+      await addSongToFavorites(newFavorite);
+    }
+    _updateFavoriteState();
+  }
+
+  Future<void> _playNext() async {
+    // Play the next song in the playlist
+    if (!widget.isFromRecent) {
+      // If in the playlist, play the next song in the playlist
+      if (currentIndex < currentPlaylist.length - 1) {
+        setState(() {
+          currentIndex++;
+        });
+        await _initializePlayer();
+      } else {
+        // Optionally loop back to the first song in the playlist
+        setState(() {
+          currentIndex = 0; // Uncomment to loop back to the first song in the playlist
+        });
+        await _initializePlayer();
+      }
+    } else {
+      // If in the favorites, play the next song in the favorites
+      if (currentIndex < favoriteNotifier.value.length - 1) {
+        setState(() {
+          currentIndex++;
+        });
+        await _initializePlayer();
+      } else {
+        // Optionally loop back to the first song in favorites
+        setState(() {
+          currentIndex = 0; // Uncomment to loop back to the first favorite
+        });
+        await _initializePlayer();
+      }
     }
   }
 
@@ -149,16 +161,8 @@ class _PlayingNowState extends State<PlayingNow> {
       setState(() {
         currentIndex--;
       });
-      await _initializePlayer(); // Initialize player with the previous song
-      await addRecentPlay(RecentPlayModel( // Add the previous song to recent plays
-        id: currentPlaylist[currentIndex].id!,
-        songTitle: currentPlaylist[currentIndex].songTitle,
-        artist: currentPlaylist[currentIndex].artist,
-        uri: currentPlaylist[currentIndex].uri,
-        imageUri: currentPlaylist[currentIndex].imageBytes!,
-        timestamp: DateTime.now(),
-        songPath: currentPlaylist[currentIndex].songPath,
-      ));
+      await _initializePlayer();
+      _updateFavoriteState();
     }
   }
 
@@ -175,6 +179,8 @@ class _PlayingNowState extends State<PlayingNow> {
     isPlayingNotifier.dispose();
     durationNotifier.dispose();
     positionNotifier.dispose();
+    isFavoriteNotifier.dispose();
+    favoriteNotifier.removeListener(_updateFavoriteState);
     super.dispose();
   }
 
@@ -266,8 +272,8 @@ class _PlayingNowState extends State<PlayingNow> {
                           value: position.inSeconds.toDouble(),
                           max: duration.inSeconds.toDouble(),
                           onChanged: (value) async {
-                            final position = Duration(seconds: value.toInt());
-                            await _audioPlayer.seek(position);
+                            final newPosition = Duration(seconds: value.toInt());
+                            await _audioPlayer.seek(newPosition);
                           },
                         ),
                         Row(
@@ -304,7 +310,7 @@ class _PlayingNowState extends State<PlayingNow> {
                       icon: const Icon(Icons.skip_previous, color: Colors.white),
                       onPressed: _playPrevious,
                     ),
-                    IconButton (
+                    IconButton(
                       icon: Icon(
                         isPlaying ? Icons.pause : Icons.play_arrow,
                         color: Colors.white,
@@ -316,10 +322,9 @@ class _PlayingNowState extends State<PlayingNow> {
                       icon: const Icon(Icons.skip_next, color: Colors.white),
                       onPressed: _playNext,
                     ),
-                    ValueListenableBuilder<List<FavoriteModel>>(
-                      valueListenable: favoriteNotifier,
-                      builder: (context, favorites, _) {
-                        final isFavorite = favorites.any((fav) => fav.id == widget.song.id);
+                    ValueListenableBuilder<bool>(
+                      valueListenable: isFavoriteNotifier,
+                      builder: (context, isFavorite, _) {
                         return IconButton(
                           icon: Icon(
                             isFavorite ? Icons.favorite : Icons.favorite_border,

@@ -80,15 +80,15 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                       style: const TextStyle(color: Colors.white70),
                     ),
                     onTap: () {
-                      // Navigate to the PlayingNow screen when the song is tapped
+                    
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => PlayingNow(
-                            song: song, // Pass the song to the PlayingNow screen
-                            allSongs: favoriteSongs, // Pass the list of favorite songs
-                            recentPlays: [], // You can pass recent plays if needed
-                            isFromRecent: false, // Set this based on your logic
+                            song: song, 
+                            allSongs: favoriteSongs, 
+                            recentPlays: [],
+                            isFromRecent: false, 
                           ),
                         ),
                       );

@@ -1,4 +1,4 @@
-package com.example.pluseplay
+package com.abcd.pulse.play
 
 import io.flutter.embedding.android.FlutterActivity
 

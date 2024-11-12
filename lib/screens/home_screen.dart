@@ -3,16 +3,13 @@ import 'package:pluseplay/database/function/hive_store.dart';
 import 'package:pluseplay/database/function/internal_storage.dart';
 import 'package:pluseplay/database/function/recent_play/recent_play.dart';
 import 'package:pluseplay/database/models/all_songs/all_song_model.dart';
-import 'package:pluseplay/database/models/recent_play/recent_play.dart';
 import 'package:pluseplay/screens/allsongs/allsongs.dart';
 import 'package:pluseplay/screens/favourites/favorites_screen.dart';
 import 'package:pluseplay/screens/playList/playlist.dart';
 import 'package:pluseplay/screens/search/search.dart';
 import 'package:pluseplay/screens/settings/settings_screen.dart';
-import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:pluseplay/screens/widgets/all_songs_widget.dart';
 import 'package:pluseplay/screens/nowPlaying/now_play.dart';
-import 'package:on_audio_query/on_audio_query.dart';
 import 'package:pluseplay/screens/widgets/nav_bar.dart';
 import 'package:pluseplay/screens/widgets/recent_play_widget.dart';
 

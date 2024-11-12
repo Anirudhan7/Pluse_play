@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:pluseplay/database/function/internal_storage.dart';
 import 'package:pluseplay/screens/home_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pluseplay/screens/onboarding_screen.dart';

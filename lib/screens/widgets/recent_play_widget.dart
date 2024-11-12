@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:pluseplay/database/function/hive_store.dart';
 import 'package:pluseplay/database/function/recent_play/recent_play.dart';
 import 'package:pluseplay/database/models/recent_play/recent_play.dart';
-import 'package:pluseplay/database/models/all_songs/all_song_model.dart';
 import 'package:pluseplay/screens/nowPlaying/now_play.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 

@@ -58,6 +58,21 @@ class PlaylistDetailScreen extends StatelessWidget {
                       song.artist,
                       style: const TextStyle(color: Colors.grey),
                     ),
+                    trailing: PopupMenuButton<int>(
+                      icon: const Icon(Icons.more_vert, color: Colors.white),
+                      itemBuilder: (context) => [
+                        const PopupMenuItem<int>(
+                          value: 2,
+                          child: Text("Remove from Playlist"),
+                        ),
+                      ],
+                      onSelected: (value) {
+                        if (value == 2) {
+                          // Handle remove from playlist logic
+                          _removeFromPlaylist(context, song, playlist);
+                        }
+                      },
+                    ),
                     onTap: () {
                       // Navigate to the PlayingNow screen with the song
                       Navigator.push(
@@ -86,6 +101,16 @@ class PlaylistDetailScreen extends StatelessWidget {
           },
         ),
       ),
+    );
+  }
+
+  void _removeFromPlaylist(BuildContext context, dynamic song, Playlist playlist) {
+    playlist.songs.removeWhere((s) => s.id == song.id);
+
+    playlistsNotifier.value = [...playlistsNotifier.value];
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('${song.songTitle} removed from playlist!')),
     );
   }
 }
