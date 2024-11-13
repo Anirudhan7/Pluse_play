@@ -124,32 +124,31 @@ class _PlayingNowState extends State<PlayingNow> {
   }
 
   Future<void> _playNext() async {
-    // Play the next song in the playlist
+
     if (!widget.isFromRecent) {
-      // If in the playlist, play the next song in the playlist
+    
       if (currentIndex < currentPlaylist.length - 1) {
         setState(() {
           currentIndex++;
         });
         await _initializePlayer();
       } else {
-        // Optionally loop back to the first song in the playlist
+
         setState(() {
-          currentIndex = 0; // Uncomment to loop back to the first song in the playlist
+          currentIndex = 0;
         });
         await _initializePlayer();
       }
     } else {
-      // If in the favorites, play the next song in the favorites
+
       if (currentIndex < favoriteNotifier.value.length - 1) {
         setState(() {
           currentIndex++;
         });
         await _initializePlayer();
       } else {
-        // Optionally loop back to the first song in favorites
         setState(() {
-          currentIndex = 0; // Uncomment to loop back to the first favorite
+          currentIndex = 0; 
         });
         await _initializePlayer();
       }

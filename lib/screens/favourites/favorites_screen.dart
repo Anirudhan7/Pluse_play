@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:pluseplay/database/function/favourite/favourite.dart';
 import 'package:pluseplay/database/models/favourites/favourite_model.dart';
 import 'package:pluseplay/screens/nowPlaying/now_play.dart';
-import 'package:on_audio_query/on_audio_query.dart'; // Import for QueryArtworkWidget
-import 'package:pluseplay/database/function/playlists/plaListfunc.dart'; // Import for playlist functions
-import 'package:pluseplay/database/models/playlist/playList.dart'; // Import for Playlist model
+import 'package:on_audio_query/on_audio_query.dart'; 
+import 'package:pluseplay/database/function/playlists/plaListfunc.dart'; 
+import 'package:pluseplay/database/models/playlist/playList.dart'; 
 
 class FavoritesScreen extends StatefulWidget {
   @override
@@ -124,12 +124,11 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                                                 id: song.id!,
                                                 songTitle: song.songTitle,
                                                 artist: song.artist,
-                                                uri: song.uri ?? '', // Provide a default value if null
+                                                uri: song.uri ?? '', 
                                                 imageUri: song.imageUri,
                                                 songPath: song.songPath,
                                               );
 
-                                              // Ensure playlist.id is not null
                                               if (playlist.id != null) {
                                                 addSongToPlaylist(playlist.name, songToAdd);
                                                 Navigator.pop(context);

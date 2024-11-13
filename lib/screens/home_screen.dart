@@ -250,17 +250,17 @@ class ArtistDetailScreen extends StatelessWidget {
         title: Text(
           artistName,
           style: const TextStyle(
-            color: Colors.white, // Set text color to white
-            fontSize: 20, // Increase font size
-            fontWeight: FontWeight.bold, // Make it bold
+            color: Colors.white, 
+            fontSize: 20, 
+            fontWeight: FontWeight.bold, 
           ),
         ),
         backgroundColor:
-            const Color.fromARGB(255, 13, 3, 56), // Set a dark background color
+            const Color.fromARGB(255, 13, 3, 56), 
       ),
       body: Container(
         color: const Color.fromARGB(
-            255, 12, 5, 144), // Set a dark background color for the body
+            255, 12, 5, 144),
         child: ValueListenableBuilder<List<AllSongModel>>(
           valueListenable: allSongNotifier,
           builder: (context, allSongs, child) {
@@ -271,7 +271,7 @@ class ArtistDetailScreen extends StatelessWidget {
                     child: Text(
                       "No Songs Found",
                       style: TextStyle(
-                          color: Colors.white), // Ensure text is white
+                          color: Colors.white), 
                     ),
                   )
                 : ListView.builder(
